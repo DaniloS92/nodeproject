@@ -53,6 +53,17 @@ modelo.getIdNodoSensor = function(callback,idSensor){
     })
 }
 
+modelo.getNodo = function(callback,idSensor){
+    db.all('SELECT * FROM appAdministrativa_sensor WHERE id = \''+idSensor+'\') ',function(err, rows){
+        if(err)
+        {
+            throw err;
+        }else{
+            callback(null,rows);
+        }
+    });
+}
+
 
 //debemos escribir esta linea para poder utilizar el modelo
 module.exports = modelo;

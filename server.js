@@ -18,6 +18,8 @@ var sp;//variable donde se instanciara temporalmente el puerto serial para poder
 var timout;//controloar los tiempos de intervalo de encendido y apagado de las bonbas de agua en este caso
 var timeIn;
 
+var tiempo;//timer global
+
 //creacion de variables globales
 
 var numSen1,numSen2;// numeros que se reciven del sensor 1 y 2 para parsear y evitar errores
@@ -84,8 +86,7 @@ io.on('connection',function(socket){
     function onOpen(){
         console.log("Se conecto al puerto: "+puertoAct);
         console.log("Esperando datos....");
-        //InicioTemporizadores('2','1','M');
-        var tiempo = setInterval(function(){
+        tiempo = setInterval(function(){
 			calcularEventos();
 		},10000)
     }
@@ -325,7 +326,7 @@ io.on('connection',function(socket){
     }
 
     function IniciarSoloTimmers(){//iniciar los timmers sin depender del metodo onData
-        setInterval(function(){
+        tiempo = setInterval(function(){
 			calcularEventos();
 		},10000)
     }
@@ -344,6 +345,8 @@ io.on('connection',function(socket){
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
 
         //------------------------------------------------------------------------------
+
+        
 
         for (var i = 0; i < arrayTemporal.length; i++) {
             arrayTemporal[i] = parseInt(arrayTemporal[i]);
