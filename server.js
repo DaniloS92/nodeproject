@@ -85,9 +85,9 @@ io.on('connection',function(socket){
         console.log("Se conecto al puerto: "+puertoAct);
         console.log("Esperando datos....");
         //InicioTemporizadores('2','1','M');
-        //setInterval(function(){
-			//calcularEventos();
-		//},10000)
+        var tiempo = setInterval(function(){
+			calcularEventos();
+		},10000)
     }
 
 
@@ -111,8 +111,6 @@ io.on('connection',function(socket){
             //llamar al metodo de alertas e inicio del riego automatico si tubuiera q ser asi
 
             //-------------------------------------------------------------------------------
-
-            calcularEventos();
 
             if(validacion2(vectorDatos)){
             //if (validacion(sen1,sen2)){
@@ -340,7 +338,7 @@ io.on('connection',function(socket){
         sp.write("C");
     }
 
-    function alertas(vectorDatos, callback){
+    function alertas(vectorDatos){
         var arrayTemporal = vectorDatos;
 
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
@@ -355,7 +353,7 @@ io.on('connection',function(socket){
 
         //------------------------------------------------------------------------------
 
-        callback(true);
+        return true;
     }
 
 });
