@@ -127,8 +127,9 @@ io.on('connection',function(socket){
                 var cadena='{\n';
                 //se agregara un for para los n sensores que se utilizaran
                 //--------------------------------------------------------
-                cadena+='"sensor_1":'+sen1+',\n';
-                cadena+='"sensor_2":'+sen2+',\n';
+                for(var i = 0; i<vectorDatos.length;i++){
+                    cadena+='"sensor_"'+i+':'+vectorDatos[i]+',\n';
+                }
                 //--------------------------------------------------------
                 cadena+='"fecha_lectura":"'+dd+'/'+mm+'/'+yyyy+'",\n';
                 cadena+='"hora_lectura":"'+hora+':'+minutos+':'+segundos+'",\n';
