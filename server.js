@@ -69,7 +69,7 @@ io.on('connection',function(socket){
     //------------------------------CONEXION AL PUERTO SERIAL-------------------------------//
 
 	socket.on('set puerto',function(data){
-
+        logsNodeJS.debug('Estableciendo conexion con el cliente con el puerto: '+data);
         console.log("Estableciendo la conexion con el puerto: "+data);
 		puertoAct = data;
 
@@ -90,11 +90,12 @@ io.on('connection',function(socket){
     //--------------------------ABRIENDO EL PUERTO SERIAL----------------------------------//
 
     function onOpen(){
+        logNode.debug('Se conecto exitosamente al puerto');
         console.log("Se conecto al puerto: "+puertoAct);
         console.log("Esperando datos....");
-        tiempo = setInterval(function(){
-			calcularEventos();
-		},10000)
+        logNode.debug('Reciviendo medidas de los sensores');
+        logNode.debug('Inicio de peticiones a la base de datos para comprobar si hay evetos pendientes');
+        IniciarSoloTimmers();
     }
 
 
@@ -104,6 +105,7 @@ io.on('connection',function(socket){
         console.log(data);
         var com = parseInt(data);
         if(com == 1011010) {
+            logNode.debug('Confirmacion recivida del sensor de la parcela');
             console.log("Confirmacion recivida");
             sp.write("S");
         }else{
@@ -114,6 +116,7 @@ io.on('connection',function(socket){
 
             io.emit("obtener medidas",vectorDatos);
 
+            logNode.debug('Eviando a preguntar si hay alertas');
             //llamar al metodo de alertas e inicio del riego automatico si tubuiera q ser asi
             alertas(vectorDatos);
             //-------------------------------------------------------------------------------
@@ -157,6 +160,7 @@ io.on('connection',function(socket){
         //sp.on('close',mostrarPuertoCerrado);
         console.log("Se envia a cerrar el servidor con el cliente");
         arraySerialPort = [];
+        logNode.debug('se cerro la conexion con el cliente');
 		//cancelar();
 	});
 
@@ -270,6 +274,7 @@ io.on('connection',function(socket){
 		console.log("INGRESO A LA ADMINISTRACION DEL TIEMPO");
 		timout=setTimeout(function(){
 	    	sp.write(tipoCaudal);
+            logsEventos.debug('Se envio a escribir en el sensor: '+tipoCaudal);
 	    	console.log("Escribo: "+tipoCaudal);
 	    	tApagado(tiempoEncendido,tiempoApagado,tipoCaudal);
 	    },tiempoEncendido);
@@ -278,6 +283,7 @@ io.on('connection',function(socket){
 	function tApagado(tiempoEncendido,tiempoApagado,tipoCaudal){
 		timout=setTimeout(function(){
 	    	sp.write("C");
+            logsEventos.debug('Se envio a escribir en el sensor: C');
 	    	console.log("Escribo C");
 	    	administracionTiempo(tiempoEncendido,tiempoApagado,tipoCaudal);
 	    },tiempoApagado);
@@ -285,6 +291,7 @@ io.on('connection',function(socket){
 	
 	function cancelar(){
 		console.log("Timmers desabilitados: no hay nada planificado");
+        logNode.debug('Timers desabilitados');
 	    clearTimeout(timout);
 		clearTimeout(timeIn);
 	}
@@ -324,6 +331,7 @@ io.on('connection',function(socket){
 
     function cerrarPuerto(){
         sp.on('close',mostrarPuertoCerrado);
+        logNode.debug('Se cerro la conexion con el puerto');
     }
 
     function mostrarPuertoCerrado(){
@@ -335,21 +343,25 @@ io.on('connection',function(socket){
     }
 
     function IniciarSoloTimmers(){//iniciar los timmers sin depender del metodo onData
+        logNode.debug('Inicio de la function para calcular eventos en los sensores');
         tiempo = setInterval(function(){
 			calcularEventos();
 		},10000)
     }
 
     function iniciarManualRiego(tipoCaudal){
+        logsEventos.info('Se envio manualmente al sensor: '+tipoCaudal);
         sp.write(tipoCaudal);
     }
 
     function detenerManualRiego(tipoCaudal){
+        logsEventos.info('Se detubo manualmente el sensor');
         sp.write("C");
     }
 
     function modoManual(){
         console.log("Timmers desabilitados: Modo Manual Activado!");
+        logsEventos.info('Modo manual activado');
         clearTimeout(timout);
         clearTimeout(timeIn);
         clearTimeout(tiempo);
@@ -369,20 +381,30 @@ io.on('connection',function(socket){
         };
 
         if(datosMinMax.length == arrayTemporal.length){
+
             for (var i = 0; i < arrayTemporal.length; i++) {
                 if (arrayTemporal[i] < parseInt(datosMinMax[i].medida_min)) {
+
                     modoManual();
                     socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
+                    logsEventos.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
+
                 }else if (arrayTemporal[i] > parseInt(datosMinMax[i].medida_max)){
+
                     modoManual();
                     socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" sobre los niveles recomendados!");
+                    logsEventos.warning(datosMinMax[i].tipo_sensor+'Sobre los niveles recomendados!');
+
                 }else{
                     //estado normal de las medidas.
+                    logsEventos.info('Medidas en estado normal del sensor: '+datosMinMax[i].tipo_sensor);
                 }
             };
         }else{
             console.log('Error: Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
+            logsEventos.error('Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
         }
+        
     }
 });
 
