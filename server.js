@@ -110,7 +110,7 @@ io.on('connection',function(socket){
             io.emit("obtener medidas",vectorDatos);
 
             //llamar al metodo de alertas e inicio del riego automatico si tubuiera q ser asi
-
+            alertas(vectorDatos);
             //-------------------------------------------------------------------------------
 
             if(validacion2(vectorDatos)){
@@ -353,7 +353,6 @@ io.on('connection',function(socket){
     function alertas(vectorDatos){
         var arrayTemporal = vectorDatos;
         var datosMinMax;
-
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
 
         modelo.getMedidasMinMax(function(idParcela,data){//devuelve un array con los actuadores de la clase consultas.js
@@ -379,12 +378,6 @@ io.on('connection',function(socket){
         }else{
             console.log('Error: Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
         }
-        
-        //realizar las preguntas y enviar activar los actuadores si es necesario
-
-        //----------------------------------------------------------------------
-
-        return true;
     }
 });
 
