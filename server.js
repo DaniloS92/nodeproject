@@ -10,6 +10,10 @@ var SerialPort = serialport.SerialPort;//instanciando el modulo de serialPort(ob
 var sqlite3 = require('sqlite3').verbose();//modulo para conectarse con la base de datos SQLite
 var fs = require('fs');//modulo para leer y escribir archivos en este caso JSON
 var modelo = require('./consultas.js');//importando otra clase exclusiva para las consultas
+var fs = require('fs')
+  , Log = require('log')
+  , log = new Log('debug', fs.createWriteStream('logsEventos.log'))
+  , logNode = new Log('debug', fs.createWriteStream('logsNodeJS'));
 
 /*CREACION DE VARIABLES GLOBALES*/
 
@@ -45,6 +49,7 @@ var bandera = false;
 io.on('connection',function(socket){
 
 	console.log("Si esta conectando");
+    logNode.debug("Se realizo la conexion del cliente con el servidor");
 
 	serialport.list(function (err, ports) {//metodo del modulo de serialPort que me permite saber que puertos seriales estan conectados
 		ports.forEach(function(port) {
