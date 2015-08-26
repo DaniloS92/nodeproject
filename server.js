@@ -22,13 +22,14 @@ var tiempo;//timer global
 
 //creacion de variables globales
 
-var numSen1,numSen2;// numeros que se reciven del sensor 1 y 2 para parsear y evitar errores
+var numSen1,numSen2;//numeros que se reciven del sensor 1 y 2 para parsear y evitar errores
 var arrayComparaciones; // array que hara las comparaciones de los datos anteriores obtenidos de las medidas
 
 var diasSemana = new Array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado");//vector para calcular los dias de la semana
 var datos;//vector donde se van a guardar los resultados de los dias y las horas qye se efectuaran los actuadores
 var arraySerialPort = new Array();//vector donde se guardaran los conectores de los puertos seriales disponibles
 var puertoAct;//alamacena el puerto actual para realizar la conexion por ese puerto
+var idParcela;
 
 
 var hoy;
@@ -100,7 +101,6 @@ io.on('connection',function(socket){
         if(com == 1011010) {
             console.log("Confirmacion recivida");
             sp.write("S");
-            //sp.write("A");
         }else{
             console.log(data.split(";")); //debug :v
             var vectorDatos=data.split(";");
@@ -154,6 +154,10 @@ io.on('connection',function(socket){
         arraySerialPort = [];
 		//cancelar();
 	});
+
+    socket.on('obtener parcela',function(data){
+        idParcela = data;
+    });
 
 	function validacion(num1,num2){
 		var respuesta = false;
@@ -339,28 +343,48 @@ io.on('connection',function(socket){
         sp.write("C");
     }
 
+    function modoManual(){
+        console.log("Timmers desabilitados: Modo Manual Activado!");
+        clearTimeout(timout);
+        clearTimeout(timeIn);
+        clearTimeout(tiempo);
+    }
+
     function alertas(vectorDatos){
         var arrayTemporal = vectorDatos;
         var datosMinMax;
 
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
 
-        //------------------------------------------------------------------------------
-
-        modelo.getMedidasMinMax(function(datos.id_nodo_id,data){//devuelve un array con los actuadores de la clase consultas.js
+        modelo.getMedidasMinMax(function(idParcela,data){//devuelve un array con los actuadores de la clase consultas.js
                 datosMinMax = datos;
         });
 
         for (var i = 0; i < arrayTemporal.length; i++) {
             arrayTemporal[i] = parseInt(arrayTemporal[i]);
         };
+
+        if(datosMinMax.length == arrayTemporal.length){
+            for (var i = 0; i < arrayTemporal.length; i++) {
+                if (arrayTemporal[i] < parseInt(datosMinMax[i].medida_min)) {
+                    modoManual();
+                    socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
+                }else if (arrayTemporal[i] > parseInt(datosMinMax[i].medida_max)){
+                    modoManual();
+                    socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" sobre los niveles recomendados!");
+                }else{
+                    //estado normal de las medidas.
+                }
+            };
+        }else{
+            console.log('Error: Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
+        }
         
         //realizar las preguntas y enviar activar los actuadores si es necesario
 
-        //------------------------------------------------------------------------------
+        //----------------------------------------------------------------------
 
         return true;
     }
-
 });
 
