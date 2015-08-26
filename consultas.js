@@ -41,8 +41,8 @@ modelo.getTipoSensor = function(callback)
     });
 }
 
-modelo.getIdNodoSensor = function(callback,idSensor){
-    db.all('SELECT id as id_nodo_sensor FROM appAdministrativa_node_sensor WHERE id_nodo_id = \''+idSensor+'\') ',function(err, rows)
+modelo.getIdNodoSensor = function(idSensor,callback){
+    db.all('SELECT id_sensor_id FROM appAdministrativa_node_sensor WHERE id_nodo_id = \''+idSensor+'\'',function(err, rows)
     {
         if(err)
         {
@@ -53,8 +53,9 @@ modelo.getIdNodoSensor = function(callback,idSensor){
     })
 }
 
-modelo.getNodo = function(callback,idSensor){
-    db.all('SELECT * FROM appAdministrativa_sensor WHERE id = \''+idSensor+'\') ',function(err, rows){
+modelo.getMedidasMinMax = function(idParcela,callback){
+    db.all('select tipo_sensor, medida_min, medida_max from appAdministrativa_sensor where id in (select id_sensor_id from appAdministrativa_nodo_sensor where id_nodo_id in (select id from appAdministrativa_nodo where id_parcela_id = '+idParcela+'))',function(err, rows)
+    {
         if(err)
         {
             throw err;

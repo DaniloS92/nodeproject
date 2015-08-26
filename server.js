@@ -127,7 +127,7 @@ io.on('connection',function(socket){
                 //se agregara un for para los n sensores que se utilizaran
                 //--------------------------------------------------------
                 for(var i = 0; i<vectorDatos.length;i++){
-                    cadena+='"sensor_"'+i+':'+vectorDatos[i]+',\n';
+                    cadena+='"sensor_"'+(i+1)+':'+vectorDatos[i]+',\n';
                 }
                 //--------------------------------------------------------
                 cadena+='"fecha_lectura":"'+dd+'/'+mm+'/'+yyyy+'",\n';
@@ -341,12 +341,15 @@ io.on('connection',function(socket){
 
     function alertas(vectorDatos){
         var arrayTemporal = vectorDatos;
+        var datosMinMax;
 
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
 
         //------------------------------------------------------------------------------
 
-        
+        modelo.getMedidasMinMax(function(datos.id_nodo_id,data){//devuelve un array con los actuadores de la clase consultas.js
+                datosMinMax = datos;
+        });
 
         for (var i = 0; i < arrayTemporal.length; i++) {
             arrayTemporal[i] = parseInt(arrayTemporal[i]);
