@@ -404,7 +404,6 @@ io.on('connection',function(socket){
             console.log('Error: Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
             logsEventos.error('Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
         }
-
     }
 });
 
