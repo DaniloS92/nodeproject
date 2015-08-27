@@ -133,18 +133,18 @@ io.on('connection',function(socket){
                 minutos = hoy.getMinutes();
                 segundos = hoy.getSeconds();
 
-                var cadena='{\n';
+                var cadena='[\n';
                 //se agregara un for para los n sensores que se utilizaran
                 //--------------------------------------------------------
                 for(var i = 0; i<vectorDatos.length;i++){
-                    cadena+='"sensor_"'+(i+1)+':'+vectorDatos[i]+',\n';
+                    cadena+=+vectorDatos[i]+',\n';
                 }
                 //--------------------------------------------------------
-                cadena+='"fecha_lectura":"'+dd+'/'+mm+'/'+yyyy+'",\n';
-                cadena+='"hora_lectura":"'+hora+':'+minutos+':'+segundos+'",\n';
-                cadena+='"nodo_sensor": "nodo 1",\n';
-                cadena+='"parcela": "parcela 1"\n';
-                cadena+='},\n';
+                cadena+=''+dd+'/'+mm+'/'+yyyy+'",\n';//fecha lectura
+                cadena+=''+hora+':'+minutos+':'+segundos+'",\n';//hora de lectura
+                cadena+='"nodo 1",\n';//nodeo_sensor
+                cadena+='"parcela 1,"\n';//parcela
+                cadena+='],\n';
                 fs.appendFile('./lecturas.json', cadena, function(err) {
                     if( err ){
                         console.log( err );
@@ -276,7 +276,7 @@ io.on('connection',function(socket){
 		console.log("INGRESO A LA ADMINISTRACION DEL TIEMPO");
 		timout=setTimeout(function(){
 	    	sp.write(tipoCaudal);
-            logsEventos.debug('Se envio a escribir en el sensor: '+tipoCaudal);
+            log.debug('Se envio a escribir en el sensor: '+tipoCaudal);
 	    	console.log("Escribo: "+tipoCaudal);
 	    	tApagado(tiempoEncendido,tiempoApagado,tipoCaudal);
 	    },tiempoEncendido);
@@ -285,7 +285,7 @@ io.on('connection',function(socket){
 	function tApagado(tiempoEncendido,tiempoApagado,tipoCaudal){
 		timout=setTimeout(function(){
 	    	sp.write("C");
-            logsEventos.debug('Se envio a escribir en el sensor: C');
+            log.debug('Se envio a escribir en el sensor: C');
 	    	console.log("Escribo C");
 	    	administracionTiempo(tiempoEncendido,tiempoApagado,tipoCaudal);
 	    },tiempoApagado);
@@ -333,10 +333,12 @@ io.on('connection',function(socket){
 
 socket.on('Encender',function(){
     sp.write("F");
+    log.debug('Se mando a encender el foco');
 });
 
-socket.of('Apagado',function(){
+socket.on('Apagado',function(){
     sp.write("D");
+    log.debug('Se mando a apagar el foco');
 });
 
 //---------------------------------ADMINISTRACION DEL SISTEMA------------------------------------------------------//
@@ -363,18 +365,18 @@ socket.of('Apagado',function(){
     }
 
     function iniciarManualRiego(tipoCaudal){
-        logsEventos.info('Se envio manualmente al sensor: '+tipoCaudal);
+        log.info('Se envio manualmente al sensor: '+tipoCaudal);
         sp.write(tipoCaudal);
     }
 
     function detenerManualRiego(tipoCaudal){
-        logsEventos.info('Se detubo manualmente el sensor');
+        log.info('Se detubo manualmente el sensor');
         sp.write("C");
     }
 
     function modoManual(){
         console.log("Timmers desabilitados: Modo Manual Activado!");
-        logsEventos.info('Modo manual activado');
+        log.info('Modo manual activado');
         clearTimeout(timout);
         clearTimeout(timeIn);
         clearTimeout(tiempo);
@@ -405,7 +407,7 @@ socket.of('Apagado',function(){
                         //agregar un contador cada cuanto pasa esto y si es una x cantidad de tiempo, ahi mandar a apagar las bombas
                         modoManual();
                         socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
-                        logsEventos.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
+                        log.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
                         alerta = 0;
                     }
 
@@ -415,18 +417,18 @@ socket.of('Apagado',function(){
                     if(alerta == 15){
                         modoManual();
                         socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" sobre los niveles recomendados!");
-                        logsEventos.warning(datosMinMax[i].tipo_sensor+'Sobre los niveles recomendados!');
+                        log.warning(datosMinMax[i].tipo_sensor+'Sobre los niveles recomendados!');
                         alerta = 0;
                     }
                 }else{
                     //estado normal de las medidas.
                     alerta = 0;
-                    logsEventos.info('Medidas en estado normal del sensor: '+datosMinMax[i].tipo_sensor);
+                    log.info('Medidas en estado normal del sensor: '+datosMinMax[i].tipo_sensor);
                 }
             }
         }else{
             console.log('Error: Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
-            logsEventos.error('Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
+            log.error('Incongruencia en los datos recividos con los sensores registrados en su base de datos.');
         }
     }
 });
