@@ -388,6 +388,7 @@ io.on('connection',function(socket){
                     modoManual();
                     socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
                     logsEventos.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
+                    //agregar un contador cada cuanto pasa esto y si es una x cantidad de tiempo, ahi mandar a apagar las bombas
 
                 }else if (arrayTemporal[i] > parseInt(datosMinMax[i].medida_max)){
 
