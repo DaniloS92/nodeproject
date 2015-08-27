@@ -370,6 +370,7 @@ io.on('connection',function(socket){
     function alertas(vectorDatos){
         var arrayTemporal = vectorDatos;
         var datosMinMax;
+        var alerta = 0;
         //realizar la consulta de los datos para saber cuales son los maximos aceptables
 
         modelo.getMedidasMinMax(function(idParcela,data){//devuelve un array con los actuadores de la clase consultas.js
@@ -384,20 +385,27 @@ io.on('connection',function(socket){
 
             for (var i = 0; i < arrayTemporal.length; i++) {
                 if (arrayTemporal[i] < parseInt(datosMinMax[i].medida_min)) {
-
-                    modoManual();
-                    socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
-                    logsEventos.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
-                    //agregar un contador cada cuanto pasa esto y si es una x cantidad de tiempo, ahi mandar a apagar las bombas
+                    
+                    alerta = alerta + 1;
+                    if(alerta == 30){
+                        //agregar un contador cada cuanto pasa esto y si es una x cantidad de tiempo, ahi mandar a apagar las bombas
+                        modoManual();
+                        socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" bajo de los niveles recomendados!");
+                        logsEventos.warning(datosMinMax[i].tipo_sensor+'Bajo de los niveles recomendados!');
+                        alerta = 0;
+                    }
 
                 }else if (arrayTemporal[i] > parseInt(datosMinMax[i].medida_max)){
 
-                    modoManual();
-                    socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" sobre los niveles recomendados!");
-                    logsEventos.warning(datosMinMax[i].tipo_sensor+'Sobre los niveles recomendados!');
-
+                    if(alerta == 30){
+                        modoManual();
+                        socket.emit('mensaje',""+datosMinMax[i].tipo_sensor+" sobre los niveles recomendados!");
+                        logsEventos.warning(datosMinMax[i].tipo_sensor+'Sobre los niveles recomendados!');
+                        alerta = 0;
+                    }
                 }else{
                     //estado normal de las medidas.
+                    alerta = 0;
                     logsEventos.info('Medidas en estado normal del sensor: '+datosMinMax[i].tipo_sensor);
                 }
             };
