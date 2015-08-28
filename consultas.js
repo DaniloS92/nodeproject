@@ -54,7 +54,7 @@ modelo.getIdNodoSensor = function(idSensor,callback){
 }
 
 modelo.getMedidasMinMax = function(idParcela,callback){
-    db.all('select tipo_sensor, medida_min, medida_max from appAdministrativa_sensor where id in (select id_sensor_id from appAdministrativa_nodo_sensor where id_nodo_id in (select id from appAdministrativa_nodo where id_parcela_id = '+idParcela+'))',function(err, rows)
+    db.all('select tipo_sensor, medida_min, medida_max from appAdministrativa_sensor where id in (select id_sensor_id from appAdministrativa_nodo_sensor where id_nodo_id in (select id from appAdministrativa_nodo where id_parcela_id = \''+idParcela+'\'))',function(err, rows)
     {
         if(err)
         {
@@ -65,6 +65,15 @@ modelo.getMedidasMinMax = function(idParcela,callback){
     });
 }
 
-
+modelo.getIdNodo = function(idParcela, callback){
+    db.all('select id from appAdministrativa_nodo where id_parcela_id = \''+idParcela+'\'',function(err,rows){
+        if(err)
+        {
+            throw err;
+        }else{
+            callback(null,rows);
+        }
+    });
+}
 //debemos escribir esta linea para poder utilizar el modelo
 module.exports = modelo;

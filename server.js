@@ -34,6 +34,7 @@ var datos;//vector donde se van a guardar los resultados de los dias y las horas
 var arraySerialPort = new Array();//vector donde se guardaran los conectores de los puertos seriales disponibles
 var puertoAct;//alamacena el puerto actual para realizar la conexion por ese puerto
 var idParcela;
+var idNodo;
 
 
 var hoy;
@@ -142,8 +143,8 @@ io.on('connection',function(socket){
                 //--------------------------------------------------------
                 cadena+=''+dd+'/'+mm+'/'+yyyy+'",\n';//fecha lectura
                 cadena+=''+hora+':'+minutos+':'+segundos+'",\n';//hora de lectura
-                cadena+='"nodo 1",\n';//nodeo_sensor
-                cadena+='"parcela 1,"\n';//parcela
+                cadena+='"'+idNodo+'",\n';//nodeo_sensor
+                cadena+='"'+idParcela+'"\n';//parcela
                 cadena+='],\n';
                 fs.appendFile('./lecturas.json', cadena, function(err) {
                     if( err ){
@@ -168,6 +169,10 @@ io.on('connection',function(socket){
 
     socket.on('obtener parcela',function(data){
         idParcela = data;
+        //obtenemos tambien el id del nodo
+        modelo.getIdNodoSensor(function(idParcela,dataNodo){//devuelve un array con los actuadores de la clase consultas.js
+        idNodo = dataNodo;
+        });
     });
 
 	function validacion(num1,num2){
